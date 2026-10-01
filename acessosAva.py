@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import streamlit as st
 import plotly.express as px
+
 def procurarBase():
     
     pasta_raiz = Path(__file__).resolve().parent
