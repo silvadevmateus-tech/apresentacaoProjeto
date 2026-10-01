@@ -697,12 +697,12 @@ def acessoAva():
     # =========================================================
 
     with st.expander(
-        f"🔎 Visualizar registros sem acesso ({len(quantidadeNuncaAcessou)})"
+        f"🔎 Visualizar registros de acesso ({len(base)})"
     ):
 
         st.dataframe(
 
-            quantidadeNuncaAcessou,
+            base,
 
             width='stretch',
 
