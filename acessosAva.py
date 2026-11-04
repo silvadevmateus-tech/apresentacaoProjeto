@@ -6,7 +6,7 @@ import plotly.express as px
 def procurarBase():
     
     pasta_raiz = Path(__file__).resolve().parent
-    arquivo_base = (pasta_raiz / "basesAva" / f"report_1793704783.xlsx")
+    arquivo_base = (pasta_raiz / "basesAva" / f"report_1793792536.xlsx")
     
     base = pd.read_excel(arquivo_base, dtype={"categoria": str})
     return base
