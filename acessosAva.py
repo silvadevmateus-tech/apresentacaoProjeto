@@ -6,7 +6,7 @@ import plotly.express as px
 def procurarBase():
     
     pasta_raiz = Path(__file__).resolve().parent
-    arquivo_base = (pasta_raiz / "basesAva" / f"report_1793792536.xlsx")
+    arquivo_base = (pasta_raiz / "basesAva" / f"report_1794308471.xlsx")
     
     base = pd.read_excel(arquivo_base, dtype={"categoria": str})
     return base
@@ -208,6 +208,29 @@ def acessoAva():
 
     base = procurarBase()
 
+    if "mes_disciplina" not in base.columns:
+        base['mes_disciplina'] = ""
+        
+    base['data_inicio'] = base["data_inicio"].astype(str)
+    
+    meses = {
+        "-01-": "Janeiro",
+        "-02-": "Fevereiro",
+        "-03-": "Março",
+        "-04-": "Abril",
+        "-05-": "Maio",
+        "-06-": "Junho",
+        "-07-": "Julho",
+        "-08-": "Agosto",
+        "-09-": "Setembro",
+        "-10-": "Outubro",
+        "-11-": "Novembro",
+        "-12-": "Dezembro",
+    }
+    
+    for num, mes in meses.items():
+        base.loc[base["data_inicio"].str.contains(num), 'mes_disciplina'] = mes
+
     base = base.loc[
         base["categoria"].str.contains(
             "2026",
@@ -221,6 +244,8 @@ def acessoAva():
             na=False
         )
     ]
+    
+    
 
     with st.sidebar:
             st.title("⚙️ Filtros")
@@ -228,13 +253,14 @@ def acessoAva():
             st.caption("Utilize os filtros abaixo para refinar os dados.")
     
             periodo = st.selectbox(
-                "Período letivo",
+                "Mês da disciplina",
                 ["Todos"] + sorted(
-                    base["categoria"]
+                    base["mes_disciplina"]
                     .dropna()
                     .astype(str)
                     .unique()
                     .tolist()
+                    
                 )
             )
             
@@ -244,22 +270,19 @@ def acessoAva():
                 ["Todos"] + sorted(
                     base["categoria_curso"]
                     .dropna()
+                    .sort_values(ascending=False)
                     .astype(str)
                     .unique()
                     .tolist()
                 )
             )
-        
-            st.divider()
-    
-            st.caption("Os indicadores e gráficos são atualizados conforme os filtros.")
 
     # =========================================================
     # INDICADORES
     # =========================================================
     if periodo != "Todos":
         base = base[
-            base["categoria"].astype(str) == str(periodo)
+            base["mes_disciplina"].astype(str) == str(periodo)
         ]
     if curso != "Todos":
         base = base[
@@ -320,7 +343,7 @@ def acessoAva():
 
     periodoSemAcesso = (
         quantidadeNuncaAcessou
-        .groupby("categoria")["ultimo_acesso"]
+        .groupby("mes_disciplina")["ultimo_acesso"]
         .count()
         .sort_values(ascending=False)
         .reset_index(
@@ -373,20 +396,20 @@ def acessoAva():
 
 
     # ---------------------------------------------------------
-    # GRÁFICO POR PERÍODO
+    # GRÁFICO POR MÊS
     # ---------------------------------------------------------
 
     graficoPeriodo = px.bar(
 
         periodoSemAcesso,
 
-        x="categoria",
+        x="mes_disciplina",
 
         y="QTD_SALAS_SEM_ACESSO",
 
         text="QTD_SALAS_SEM_ACESSO",
 
-        title="Disciplinas sem acesso por período"
+        title="Disciplinas sem acesso por mês de inicio"
     )
     
     graficoPeriodo.update_xaxes(
@@ -413,7 +436,7 @@ def acessoAva():
             b=20
         ),
 
-        xaxis_title="Período",
+        xaxis_title="Mês",
 
         yaxis_title="Quantidade",
 
@@ -583,7 +606,7 @@ def acessoAva():
 
         "👨‍🏫 Professores",
 
-        "📅 Períodos",
+        "📅 Meses",
 
         "🎓 Cursos"
 
@@ -631,7 +654,7 @@ def acessoAva():
 
         st.caption(
             "Distribuição das disciplinas sem acesso "
-            "por período letivo."
+            "por mês."
         )
 
         st.dataframe(
@@ -644,8 +667,8 @@ def acessoAva():
 
             column_config={
 
-                "categoria":
-                    "Período",
+                "mes_disciplina":
+                    "Mês",
 
                 "QTD_SALAS_SEM_ACESSO":
                     st.column_config.NumberColumn(
